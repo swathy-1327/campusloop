@@ -9,11 +9,19 @@
 <body>
     <header class="site-header">
         <div class="container nav-row">
-            <a class="brand" href="{{ url_for('auth.index') }}">CampusLoop</a>
+            <a class="brand" href="{{ url_for('auth.index') }}">
+                <span class="brand-mark">C</span>
+                <span>
+                    CampusLoop
+                    <small>Campus reuse marketplace</small>
+                </span>
+            </a>
             <nav class="nav-links">
+                <a href="{{ url_for('auth.index') }}">Home</a>
                 <a href="{{ url_for('product.marketplace') }}">Marketplace</a>
                 {% if current_user %}
                     <a href="{{ url_for('product.dashboard') }}">Dashboard</a>
+                    <a href="{{ url_for('product.add_product') }}">Add Item</a>
                     <a href="{{ url_for('request.request_center') }}">Requests</a>
                     <a href="{{ url_for('auth.profile') }}">Profile</a>
                     <a href="{{ url_for('admin.seller_verification') }}">Become a Seller</a>
@@ -26,6 +34,29 @@
                     <a class="button small" href="{{ url_for('auth.register') }}">Register</a>
                 {% endif %}
             </nav>
+        </div>
+        <div class="main-nav-strip">
+            <div class="container main-nav-inner">
+                <form method="get" action="{{ url_for('product.marketplace') }}" class="main-nav-search">
+                    <input type="text" name="q" placeholder="Search books, cycles, electronics, hostel items">
+                    <select name="category">
+                        <option value="">All categories</option>
+                        <option value="Books">Books</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Cycles">Cycles</option>
+                        <option value="Lab Items">Lab Items</option>
+                        <option value="Hostel Items">Hostel Items</option>
+                    </select>
+                    <button class="button small" type="submit">Search</button>
+                </form>
+                <div class="main-nav-links">
+                    <a href="{{ url_for('product.marketplace', category='Books') }}">Books</a>
+                    <a href="{{ url_for('product.marketplace', category='Electronics') }}">Electronics</a>
+                    <a href="{{ url_for('product.marketplace', category='Cycles') }}">Cycles</a>
+                    <a href="{{ url_for('product.marketplace', category='Lab Items') }}">Lab Items</a>
+                    <a href="{{ url_for('product.marketplace', category='Hostel Items') }}">Hostel Items</a>
+                </div>
+            </div>
         </div>
     </header>
 

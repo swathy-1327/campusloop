@@ -1,6 +1,6 @@
 # CampusLoop
 
-CampusLoop is a Flask + MongoDB MVP for a campus circular economy platform where students can buy, sell, rent, and request second-hand campus items inside a trusted ecosystem.
+CampusLoop is a Flask + MongoDB Atlas MVP for a campus circular economy platform where students can buy, sell, rent, and request second-hand campus items inside a trusted ecosystem.
 
 ## Features
 
@@ -17,23 +17,25 @@ CampusLoop is a Flask + MongoDB MVP for a campus circular economy platform where
 ## Setup
 
 1. Create and activate a virtual environment.
-2. Install dependencies with `pip install -r requirements.txt`.
+2. Install dependencies with `py -3 -m pip install -r requirements.txt`.
 3. Copy `.env.example` to `.env`.
-4. Start MongoDB locally.
-5. Run `python app.py`.
+4. Create a MongoDB Atlas cluster and copy its connection string.
+5. Add the Atlas URI to `.env` as `MONGO_URI`.
+6. Keep `ADMIN_EMAIL=admin@gmail.com` in `.env` for the admin account.
+7. Run `py -3 app.py`.
 
-The first user who registers with `admin@campusloop.local` becomes the admin automatically.
+Any account registered with `admin@gmail.com` is created as the admin account automatically.
 
 ## Demo Seed
 
-If MongoDB is running locally, you can insert demo users and products with:
+If your MongoDB Atlas connection is configured, you can insert demo users and products with:
 
 ```bash
-python seed_demo.py
+py -3 seed_demo.py
 ```
 
 Seeded logins:
 
-- `admin@campusloop.local` / `admin123`
+- `admin@gmail.com` / `admin123`
 - `seller@campusloop.local` / `seller123`
 - `buyer@campusloop.local` / `buyer123`

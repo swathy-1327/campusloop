@@ -1,4 +1,8 @@
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+import os
+import uuid
+
+from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
+from werkzeug.utils import secure_filename
 
 from models.chat_model import get_recent_chats_for_user
 from models.order_model import create_order, list_orders_for_user
@@ -58,6 +62,7 @@ def add_product():
         image_urls = request.form.get("image_urls", "").strip()
         description = request.form.get("description", "").strip()
         use_ai = request.form.get("use_ai") == "yes"
+        uploaded_images = request.files.getlist("images")
 
         if not all([title, category, use_type, price, condition, mode]):
             flash("Please complete all required product details.", "error")
@@ -69,6 +74,18 @@ def add_product():
             if not description:
                 description = ai_description
 
+        saved_image_urls = [item.strip() for item in image_urls.split(",") if item.strip()]
+        for image in uploaded_images:
+            if not image or not image.filename:
+                continue
+            filename = secure_filename(image.filename)
+            if not filename:
+                continue
+            unique_name = f"{uuid.uuid4().hex}_{filename}"
+            file_path = os.path.join(current_app.config["UPLOAD_FOLDER"], unique_name)
+            image.save(file_path)
+            saved_image_urls.append(f"/static/uploads/{unique_name}")
+
         create_product(
             seller_id=str(user["_id"]),
             title=title,
@@ -77,7 +94,7 @@ def add_product():
             price=float(price),
             condition=condition,
             mode=mode,
-            image_urls=[item.strip() for item in image_urls.split(",") if item.strip()],
+            image_urls=saved_image_urls,
             description=description,
             ai_generated_description=ai_description,
         )

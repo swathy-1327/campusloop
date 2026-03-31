@@ -79,3 +79,25 @@ def admin_update_product_status(product_id, product_status, removal_reason=""):
             }
         },
     )
+
+
+def admin_edit_product(product_id, title, category, use_type, price, condition, mode, description):
+    _products().update_one(
+        {"_id": ObjectId(product_id)},
+        {
+            "$set": {
+                "title": title,
+                "category": category,
+                "use_type": use_type,
+                "price": price,
+                "condition": condition,
+                "mode": mode,
+                "description": description,
+                "updated_at": current_app.extensions["now"](),
+            }
+        },
+    )
+
+
+def admin_delete_product(product_id):
+    _products().delete_one({"_id": ObjectId(product_id)})

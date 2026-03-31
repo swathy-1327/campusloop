@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash
 from services.trust_service import trust_level_from_score
 
 
-MONGO_URI = "mongodb://localhost:27017"
+MONGO_URI = "mongodb+srv://username:password@cluster0.example.mongodb.net/?retryWrites=true&w=majority&appName=CampusLoop"
 DB_NAME = "campusloop"
 
 
@@ -17,7 +17,7 @@ def main():
 
     admin = {
         "name": "Campus Admin",
-        "email": "admin@campusloop.local",
+        "email": "admin@gmail.com",
         "password_hash": generate_password_hash("admin123"),
         "phone": "9999999999",
         "role": "admin",
@@ -98,7 +98,7 @@ def main():
     )
 
     print("Seed complete.")
-    print(f"Admin: admin@campusloop.local / admin123 ({admin_id})")
+    print(f"Admin: admin@gmail.com / admin123 ({admin_id})")
     print(f"Seller: seller@campusloop.local / seller123 ({seller_id})")
     print(f"Buyer: buyer@campusloop.local / buyer123 ({buyer_id})")
 

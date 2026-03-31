@@ -72,6 +72,11 @@
     <div class="card-grid">
         {% for product in marketplace_products %}
             <a class="market-card" href="{{ url_for('product.product_detail', product_id=product._id) }}">
+                {% if product.image_urls %}
+                    <img class="market-image compact" src="{{ product.image_urls[0] }}" alt="{{ product.title }}">
+                {% else %}
+                    <div class="market-image compact fallback-image">CampusLoop</div>
+                {% endif %}
                 <span class="pill">{{ product.category }}</span>
                 <h3>{{ product.title }}</h3>
                 <p>{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>

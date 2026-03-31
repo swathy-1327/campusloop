@@ -3,8 +3,8 @@
 {% block content %}
 <section class="panel form-panel">
     <h1>Add a product</h1>
-    <p class="muted">Verified sellers can list items for sale or rent. AI description help is built in for demo-friendly flows.</p>
-    <form method="post" class="form-grid">
+    <p class="muted">Verified sellers can list items for sale or rent. Add direct image uploads or paste image links for quick demos.</p>
+    <form method="post" enctype="multipart/form-data" class="form-grid">
         <label>Product title
             <input type="text" name="title" required>
         </label>
@@ -35,6 +35,9 @@
                 <option value="sale">Sale</option>
                 <option value="rent">Rent</option>
             </select>
+        </label>
+        <label>Upload item images
+            <input type="file" name="images" accept="image/*" multiple>
         </label>
         <label>Image URLs
             <input type="text" name="image_urls" placeholder="Comma-separated image links">

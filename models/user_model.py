@@ -20,7 +20,8 @@ def _wrap(user):
 
 
 def create_user(name, email, phone, password):
-    is_admin = email == "admin@campusloop.local" and _users().count_documents({}) == 0
+    admin_email = current_app.config.get("ADMIN_EMAIL", "admin@gmail.com").lower()
+    is_admin = email.lower() == admin_email
     payload = {
         "name": name,
         "email": email,
@@ -54,6 +55,23 @@ def list_all_users():
     return list(_users().find().sort("created_at", -1))
 
 
+def list_users_filtered(role_filter="both", search=""):
+    filters = {}
+    if role_filter == "seller":
+        filters["role"] = "seller"
+    elif role_filter == "buyer":
+        filters["role"] = "buyer"
+
+    if search:
+        filters["$or"] = [
+            {"name": {"$regex": search, "$options": "i"}},
+            {"email": {"$regex": search, "$options": "i"}},
+            {"phone": {"$regex": search, "$options": "i"}},
+        ]
+
+    return list(_users().find(filters).sort("created_at", -1))
+
+
 def admin_update_user_status(user_id, account_status=None, is_verified_seller=None):
     updates = {}
     if account_status is not None:
@@ -64,3 +82,7 @@ def admin_update_user_status(user_id, account_status=None, is_verified_seller=No
             updates["role"] = "seller"
     if updates:
         _users().update_one({"_id": ObjectId(user_id)}, {"$set": updates})
+
+
+def admin_delete_user(user_id):
+    _users().delete_one({"_id": ObjectId(user_id)})

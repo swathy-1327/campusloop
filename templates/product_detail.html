@@ -3,6 +3,11 @@
 {% block content %}
 <section class="product-shell">
     <article class="panel">
+        {% if product.image_urls %}
+            <img class="detail-image" src="{{ product.image_urls[0] }}" alt="{{ product.title }}">
+        {% else %}
+            <div class="detail-image fallback-image">CampusLoop</div>
+        {% endif %}
         <div class="market-card-top">
             <span class="pill">{{ product.mode|capitalize }}</span>
             <span class="pill muted-pill">{{ product.category }}</span>

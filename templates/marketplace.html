@@ -30,15 +30,31 @@
 
 <section class="card-grid">
     {% for product in products %}
-        <a class="market-card" href="{{ url_for('product.product_detail', product_id=product._id) }}">
-            <div class="market-card-top">
-                <span class="pill">{{ product.mode|capitalize }}</span>
-                <span class="pill muted-pill">{{ product.condition }}</span>
+        <article class="market-card">
+            <div class="market-image-wrap">
+                {% if product.image_urls %}
+                    <img class="market-image" src="{{ product.image_urls[0] }}" alt="{{ product.title }}">
+                {% else %}
+                    <div class="market-image fallback-image">CampusLoop</div>
+                {% endif %}
+                <div class="market-card-overlay">
+                    <span class="overlay-label">Hover to buy</span>
+                    <form method="post" action="{{ url_for('product.buy_product', product_id=product._id) }}">
+                        <input type="hidden" name="payment_method" value="Cash on meetup">
+                        <button class="button overlay-button" type="submit">Buy now</button>
+                    </form>
+                </div>
             </div>
-            <h3>{{ product.title }}</h3>
-            <p>{{ product.description[:120] }}{% if product.description|length > 120 %}...{% endif %}</p>
-            <strong>{{ product.price|currency }}</strong>
-        </a>
+            <a class="market-card-link" href="{{ url_for('product.product_detail', product_id=product._id) }}">
+                <div class="market-card-top">
+                    <span class="pill">{{ product.mode|capitalize }}</span>
+                    <span class="pill muted-pill">{{ product.condition }}</span>
+                </div>
+                <h3>{{ product.title }}</h3>
+                <p>{{ product.description[:120] }}{% if product.description|length > 120 %}...{% endif %}</p>
+                <strong>{{ product.price|currency }}</strong>
+            </a>
+        </article>
     {% else %}
         <article class="panel">
             <p>No products matched your search.</p>

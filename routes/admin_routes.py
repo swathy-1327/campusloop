@@ -1,7 +1,18 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from models.product_model import admin_update_product_status, list_marketplace_products
-from models.user_model import admin_update_user_status, find_user_by_id, list_all_users
+from models.product_model import (
+    admin_delete_product,
+    admin_edit_product,
+    admin_update_product_status,
+    find_product_by_id,
+    list_marketplace_products,
+)
+from models.user_model import (
+    admin_delete_user,
+    admin_update_user_status,
+    find_user_by_id,
+    list_users_filtered,
+)
 from models.verification_model import create_verification_request, get_pending_requests, list_requests_for_user, review_verification_request
 from services.trust_service import apply_trust_event
 from utils.auth import admin_required, current_user, login_required
@@ -31,11 +42,26 @@ def seller_verification():
 @admin_bp.route("/dashboard")
 @admin_required
 def admin_dashboard():
+    role_filter = request.args.get("role", "both").strip().lower() or "both"
+    user_search = request.args.get("user_q", "").strip()
+    product_query = request.args.get("product_q", "").strip()
+    category = request.args.get("category", "").strip()
+    mode = request.args.get("mode", "").strip()
     return render_template(
         "admin_dashboard.html",
         pending_requests=get_pending_requests(),
-        users=list_all_users(),
-        products=list_marketplace_products(include_inactive=True),
+        users=list_users_filtered(role_filter=role_filter, search=user_search),
+        products=list_marketplace_products(
+            query=product_query,
+            category=category,
+            mode=mode,
+            include_inactive=True,
+        ),
+        role_filter=role_filter,
+        user_search=user_search,
+        product_query=product_query,
+        selected_category=category,
+        selected_mode=mode,
     )
 
 
@@ -68,6 +94,14 @@ def update_user_status(user_id):
     return redirect(url_for("admin.admin_dashboard"))
 
 
+@admin_bp.route("/users/<user_id>/delete", methods=["POST"])
+@admin_required
+def delete_user(user_id):
+    admin_delete_user(user_id)
+    flash("User removed from the platform.", "success")
+    return redirect(url_for("admin.admin_dashboard"))
+
+
 @admin_bp.route("/products/<product_id>/status", methods=["POST"])
 @admin_required
 def update_product_status(product_id):
@@ -77,4 +111,49 @@ def update_product_status(product_id):
         request.form.get("removal_reason", "").strip(),
     )
     flash("Product moderation updated.", "success")
+    return redirect(url_for("admin.admin_dashboard"))
+
+
+@admin_bp.route("/products/<product_id>/edit", methods=["GET", "POST"])
+@admin_required
+def edit_product(product_id):
+    product = find_product_by_id(product_id)
+    if not product:
+        flash("Product not found.", "error")
+        return redirect(url_for("admin.admin_dashboard"))
+
+    if request.method == "POST":
+        title = request.form.get("title", "").strip()
+        category = request.form.get("category", "").strip()
+        use_type = request.form.get("use_type", "").strip()
+        price = request.form.get("price", "").strip()
+        condition = request.form.get("condition", "").strip()
+        mode = request.form.get("mode", "").strip()
+        description = request.form.get("description", "").strip()
+
+        if not all([title, category, use_type, price, condition, mode, description]):
+            flash("All product fields are required for admin editing.", "error")
+            return render_template("admin_product_edit.html", product=product)
+
+        admin_edit_product(
+            product_id,
+            title=title,
+            category=category,
+            use_type=use_type,
+            price=float(price),
+            condition=condition,
+            mode=mode,
+            description=description,
+        )
+        flash("Product details updated.", "success")
+        return redirect(url_for("admin.admin_dashboard"))
+
+    return render_template("admin_product_edit.html", product=product)
+
+
+@admin_bp.route("/products/<product_id>/delete", methods=["POST"])
+@admin_required
+def delete_product(product_id):
+    admin_delete_product(product_id)
+    flash("Product removed from the platform.", "success")
     return redirect(url_for("admin.admin_dashboard"))

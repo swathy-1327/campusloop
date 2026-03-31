@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask
 
 from config import Config
@@ -14,6 +16,7 @@ from utils.helpers import format_currency, format_datetime, trust_badge_class
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
     init_db(app)
 
     app.jinja_env.filters["currency"] = format_currency

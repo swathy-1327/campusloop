@@ -4,11 +4,11 @@
 <section class="section-head">
     <div>
         <h1>Admin dashboard</h1>
-        <p>Approve sellers, moderate listings, and manage platform safety.</p>
+        <p>Approve sellers, manage users, edit product details, and moderate everything from one control panel.</p>
     </div>
 </section>
 
-<section class="grid-two">
+<section class="admin-layout">
     <article class="panel">
         <h2>Pending seller verification</h2>
         {% for item in pending_requests %}
@@ -30,35 +30,100 @@
     </article>
 
     <article class="panel">
-        <h2>Users</h2>
+        <div class="section-head">
+            <div>
+                <h2>All users</h2>
+                <p class="muted">View every user at once or filter by buyer and seller roles.</p>
+            </div>
+        </div>
+        <form method="get" class="filters admin-filters">
+            <input type="text" name="user_q" placeholder="Search name, email, phone" value="{{ user_search }}">
+            <select name="role">
+                <option value="both" {% if role_filter == 'both' %}selected{% endif %}>Both</option>
+                <option value="seller" {% if role_filter == 'seller' %}selected{% endif %}>Seller</option>
+                <option value="buyer" {% if role_filter == 'buyer' %}selected{% endif %}>Buyer</option>
+            </select>
+            <button class="button" type="submit">Filter users</button>
+        </form>
         {% for user in users %}
             <div class="admin-card">
-                <p><strong>{{ user.name }}</strong> | {{ user.email }}</p>
-                <p>{{ user.role }} | {{ user.account_status }} | Trust {{ user.trust_score }}</p>
-                <form method="post" action="{{ url_for('admin.update_user_status', user_id=user._id) }}" class="button-row">
-                    <button class="button button-secondary" name="account_status" value="active" type="submit">Keep active</button>
-                    <button class="button button-danger" name="account_status" value="blocked" type="submit">Block user</button>
-                </form>
+                <div class="admin-card-head">
+                    <div>
+                        <p><strong>{{ user.name }}</strong></p>
+                        <p>{{ user.email }} | {{ user.phone }}</p>
+                    </div>
+                    <div class="trust-chip {{ user.trust_level|trust_badge_class }}">
+                        {{ user.role|capitalize }} | {{ user.account_status }}
+                    </div>
+                </div>
+                <p>Trust score {{ user.trust_score }}{% if user.is_verified_seller %} | Verified seller{% endif %}</p>
+                <div class="button-row">
+                    <form method="post" action="{{ url_for('admin.update_user_status', user_id=user._id) }}">
+                        <button class="button button-secondary" name="account_status" value="active" type="submit">Activate</button>
+                    </form>
+                    <form method="post" action="{{ url_for('admin.update_user_status', user_id=user._id) }}">
+                        <button class="button button-danger" name="account_status" value="blocked" type="submit">Block</button>
+                    </form>
+                    <form method="post" action="{{ url_for('admin.delete_user', user_id=user._id) }}" onsubmit="return confirm('Delete this user permanently?');">
+                        <button class="button button-danger" type="submit">Delete</button>
+                    </form>
+                </div>
             </div>
+        {% else %}
+            <p class="muted">No users matched this filter.</p>
         {% endfor %}
     </article>
 </section>
 
 <section class="panel">
-    <h2>Product moderation</h2>
+    <div class="section-head">
+        <div>
+            <h2>Product moderation</h2>
+            <p class="muted">Search by product name, filter by category or mode, then edit or remove listings.</p>
+        </div>
+    </div>
+    <form method="get" class="filters admin-filters">
+        <input type="text" name="product_q" placeholder="Search products" value="{{ product_query }}">
+        <select name="category">
+            <option value="">All categories</option>
+            <option value="Books" {% if selected_category == 'Books' %}selected{% endif %}>Books</option>
+            <option value="Electronics" {% if selected_category == 'Electronics' %}selected{% endif %}>Electronics</option>
+            <option value="Cycles" {% if selected_category == 'Cycles' %}selected{% endif %}>Cycles</option>
+            <option value="Lab Items" {% if selected_category == 'Lab Items' %}selected{% endif %}>Lab Items</option>
+            <option value="Hostel Items" {% if selected_category == 'Hostel Items' %}selected{% endif %}>Hostel Items</option>
+        </select>
+        <select name="mode">
+            <option value="">Sale or rent</option>
+            <option value="sale" {% if selected_mode == 'sale' %}selected{% endif %}>Sale</option>
+            <option value="rent" {% if selected_mode == 'rent' %}selected{% endif %}>Rent</option>
+        </select>
+        <button class="button" type="submit">Filter products</button>
+    </form>
     {% for product in products %}
         <div class="admin-card">
-            <p><strong>{{ product.title }}</strong> | {{ product.category }} | {{ product.product_status }}</p>
+            <div class="admin-product-row">
+                <div>
+                    <p><strong>{{ product.title }}</strong></p>
+                    <p>{{ product.category }} | {{ product.mode|capitalize }} | {{ product.condition }} | {{ product.price|currency }}</p>
+                    <p class="muted">{{ product.use_type }}</p>
+                </div>
+                <div class="pill">{{ product.product_status|capitalize }}</div>
+            </div>
+            <p>{{ product.description[:180] }}{% if product.description|length > 180 %}...{% endif %}</p>
             <form method="post" action="{{ url_for('admin.update_product_status', product_id=product._id) }}" class="stack">
-                <input type="text" name="removal_reason" placeholder="Reason if removing">
+                <input type="text" name="removal_reason" placeholder="Reason if hiding this product">
                 <div class="button-row">
                     <button class="button button-secondary" name="product_status" value="active" type="submit">Keep active</button>
-                    <button class="button button-danger" name="product_status" value="hidden" type="submit">Hide product</button>
+                    <button class="button button-danger" name="product_status" value="hidden" type="submit">Hide</button>
+                    <a class="button button-secondary" href="{{ url_for('admin.edit_product', product_id=product._id) }}">Edit details</a>
                 </div>
+            </form>
+            <form method="post" action="{{ url_for('admin.delete_product', product_id=product._id) }}" onsubmit="return confirm('Delete this product permanently?');">
+                <button class="button button-danger" type="submit">Delete product</button>
             </form>
         </div>
     {% else %}
-        <p class="muted">No products available for moderation.</p>
+        <p class="muted">No products matched this filter.</p>
     {% endfor %}
 </section>
 {% endblock %}

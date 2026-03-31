@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Edit Product | Admin{% endblock %}
+{% block content %}
+<section class="panel form-panel">
+    <div class="section-head">
+        <div>
+            <h1>Edit product</h1>
+            <p>Update product name, tags, category, pricing, and listing details.</p>
+        </div>
+        <a class="button button-secondary" href="{{ url_for('admin.admin_dashboard') }}">Back to admin</a>
+    </div>
+    <form method="post" class="form-grid">
+        <label>Product title
+            <input type="text" name="title" value="{{ product.title }}" required>
+        </label>
+        <label>Category
+            <select name="category" required>
+                <option value="Books" {% if product.category == 'Books' %}selected{% endif %}>Books</option>
+                <option value="Electronics" {% if product.category == 'Electronics' %}selected{% endif %}>Electronics</option>
+                <option value="Cycles" {% if product.category == 'Cycles' %}selected{% endif %}>Cycles</option>
+                <option value="Lab Items" {% if product.category == 'Lab Items' %}selected{% endif %}>Lab Items</option>
+                <option value="Hostel Items" {% if product.category == 'Hostel Items' %}selected{% endif %}>Hostel Items</option>
+            </select>
+        </label>
+        <label>Use type / tag
+            <input type="text" name="use_type" value="{{ product.use_type }}" required>
+        </label>
+        <label>Price
+            <input type="number" step="1" min="0" name="price" value="{{ product.price }}" required>
+        </label>
+        <label>Condition
+            <select name="condition" required>
+                <option value="Excellent" {% if product.condition == 'Excellent' %}selected{% endif %}>Excellent</option>
+                <option value="Good" {% if product.condition == 'Good' %}selected{% endif %}>Good</option>
+                <option value="Fair" {% if product.condition == 'Fair' %}selected{% endif %}>Fair</option>
+            </select>
+        </label>
+        <label>Mode
+            <select name="mode" required>
+                <option value="sale" {% if product.mode == 'sale' %}selected{% endif %}>Sale</option>
+                <option value="rent" {% if product.mode == 'rent' %}selected{% endif %}>Rent</option>
+            </select>
+        </label>
+        <label class="full-width">Description
+            <textarea name="description" rows="6" required>{{ product.description }}</textarea>
+        </label>
+        <button class="button" type="submit">Save changes</button>
+    </form>
+</section>
+{% endblock %}
