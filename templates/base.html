@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CampusLoop{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container nav-row">
+            <a class="brand" href="{{ url_for('auth.index') }}">CampusLoop</a>
+            <nav class="nav-links">
+                <a href="{{ url_for('product.marketplace') }}">Marketplace</a>
+                {% if current_user %}
+                    <a href="{{ url_for('product.dashboard') }}">Dashboard</a>
+                    <a href="{{ url_for('request.request_center') }}">Requests</a>
+                    <a href="{{ url_for('auth.profile') }}">Profile</a>
+                    <a href="{{ url_for('admin.seller_verification') }}">Become a Seller</a>
+                    {% if current_user.role == 'admin' %}
+                        <a href="{{ url_for('admin.admin_dashboard') }}">Admin</a>
+                    {% endif %}
+                    <a href="{{ url_for('auth.logout') }}">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}">Login</a>
+                    <a class="button small" href="{{ url_for('auth.register') }}">Register</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="container page">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-stack">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>Buy less new. Use more smart.</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Add Product | CampusLoop{% endblock %}
+{% block content %}
+<section class="panel form-panel">
+    <h1>Add a product</h1>
+    <p class="muted">Verified sellers can list items for sale or rent. AI description help is built in for demo-friendly flows.</p>
+    <form method="post" class="form-grid">
+        <label>Product title
+            <input type="text" name="title" required>
+        </label>
+        <label>Category
+            <select name="category" required>
+                <option value="Books">Books</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Cycles">Cycles</option>
+                <option value="Lab Items">Lab Items</option>
+                <option value="Hostel Items">Hostel Items</option>
+            </select>
+        </label>
+        <label>Use type
+            <input type="text" name="use_type" placeholder="Semester use, daily commute, hostel utility" required>
+        </label>
+        <label>Price
+            <input type="number" name="price" min="0" step="1" required>
+        </label>
+        <label>Condition
+            <select name="condition" required>
+                <option value="Excellent">Excellent</option>
+                <option value="Good">Good</option>
+                <option value="Fair">Fair</option>
+            </select>
+        </label>
+        <label>Mode
+            <select name="mode" required>
+                <option value="sale">Sale</option>
+                <option value="rent">Rent</option>
+            </select>
+        </label>
+        <label>Image URLs
+            <input type="text" name="image_urls" placeholder="Comma-separated image links">
+        </label>
+        <label>Use AI description
+            <select name="use_ai">
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+            </select>
+        </label>
+        <label class="full-width">Description
+            <textarea name="description" rows="5" placeholder="Leave empty to auto-fill when AI is enabled."></textarea>
+        </label>
+        <button class="button" type="submit">Publish listing</button>
+    </form>
+</section>
+{% endblock %}

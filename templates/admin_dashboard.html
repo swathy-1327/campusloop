@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard | CampusLoop{% endblock %}
+{% block content %}
+<section class="section-head">
+    <div>
+        <h1>Admin dashboard</h1>
+        <p>Approve sellers, moderate listings, and manage platform safety.</p>
+    </div>
+</section>
+
+<section class="grid-two">
+    <article class="panel">
+        <h2>Pending seller verification</h2>
+        {% for item in pending_requests %}
+            <div class="admin-card">
+                <p><strong>User ID:</strong> {{ item.user_id }}</p>
+                <p><strong>ID Type:</strong> {{ item.id_type }}</p>
+                <p><strong>Proof:</strong> {{ item.id_document_url }}</p>
+                <form method="post" action="{{ url_for('admin.review_request', request_id=item._id) }}" class="stack">
+                    <input type="text" name="remark" placeholder="Remark">
+                    <div class="button-row">
+                        <button class="button" name="decision" value="approved" type="submit">Approve</button>
+                        <button class="button button-danger" name="decision" value="rejected" type="submit">Reject</button>
+                    </div>
+                </form>
+            </div>
+        {% else %}
+            <p class="muted">No pending verification requests.</p>
+        {% endfor %}
+    </article>
+
+    <article class="panel">
+        <h2>Users</h2>
+        {% for user in users %}
+            <div class="admin-card">
+                <p><strong>{{ user.name }}</strong> | {{ user.email }}</p>
+                <p>{{ user.role }} | {{ user.account_status }} | Trust {{ user.trust_score }}</p>
+                <form method="post" action="{{ url_for('admin.update_user_status', user_id=user._id) }}" class="button-row">
+                    <button class="button button-secondary" name="account_status" value="active" type="submit">Keep active</button>
+                    <button class="button button-danger" name="account_status" value="blocked" type="submit">Block user</button>
+                </form>
+            </div>
+        {% endfor %}
+    </article>
+</section>
+
+<section class="panel">
+    <h2>Product moderation</h2>
+    {% for product in products %}
+        <div class="admin-card">
+            <p><strong>{{ product.title }}</strong> | {{ product.category }} | {{ product.product_status }}</p>
+            <form method="post" action="{{ url_for('admin.update_product_status', product_id=product._id) }}" class="stack">
+                <input type="text" name="removal_reason" placeholder="Reason if removing">
+                <div class="button-row">
+                    <button class="button button-secondary" name="product_status" value="active" type="submit">Keep active</button>
+                    <button class="button button-danger" name="product_status" value="hidden" type="submit">Hide product</button>
+                </div>
+            </form>
+        </div>
+    {% else %}
+        <p class="muted">No products available for moderation.</p>
+    {% endfor %}
+</section>
+{% endblock %}
