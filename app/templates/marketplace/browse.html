@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Marketplace | CampusLoop{% endblock %}
+{% block content %}
+<section class="panel">
+    <div class="section-head">
+        <div>
+            <h1>Campus marketplace</h1>
+            <p>Browse trusted, student-focused items across sale and rental listings.</p>
+        </div>
+    </div>
+
+    <form method="get" class="filters">
+        <input type="text" name="q" placeholder="Search products" value="{{ query }}">
+        <select name="category">
+            <option value="">All categories</option>
+            <option value="Books" {% if selected_category == 'Books' %}selected{% endif %}>Books</option>
+            <option value="Electronics" {% if selected_category == 'Electronics' %}selected{% endif %}>Electronics</option>
+            <option value="Cycles" {% if selected_category == 'Cycles' %}selected{% endif %}>Cycles</option>
+            <option value="Lab Items" {% if selected_category == 'Lab Items' %}selected{% endif %}>Lab Items</option>
+            <option value="Hostel Items" {% if selected_category == 'Hostel Items' %}selected{% endif %}>Hostel Items</option>
+        </select>
+        <select name="mode">
+            <option value="">Sale or rent</option>
+            <option value="sell" {% if selected_mode == 'sell' %}selected{% endif %}>Sale</option>
+            <option value="rent" {% if selected_mode == 'rent' %}selected{% endif %}>Rent</option>
+        </select>
+        <button class="button" type="submit">Search</button>
+    </form>
+</section>
+
+<section class="card-grid">
+    {% for product in products %}
+        <article class="market-card">
+            <div class="market-image-wrap">
+                {% if product.image_url %}
+                    <img class="market-image" src="{{ product.image_url }}" alt="{{ product.title }}">
+                {% else %}
+                    <div class="market-image fallback-image">CampusLoop</div>
+                {% endif %}
+                <div class="market-card-overlay">
+                    <span class="overlay-label">Hover to buy</span>
+                    {% if current_user.is_authenticated and current_user.id != product.seller_id and product.product_status == 'available' %}
+                        <form method="post" action="{{ url_for('marketplace.buy_product', product_id=product.id) }}">
+                            <input type="hidden" name="payment_method" value="Cash on meetup">
+                            <button class="button overlay-button" type="submit">Buy now</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+            <a class="market-card-link" href="{{ url_for('marketplace.product_detail', product_id=product.id) }}">
+                <div class="market-card-top">
+                    <span class="pill">{{ product.mode|capitalize }}</span>
+                    <span class="pill muted-pill">{{ product.item_condition }}</span>
+                </div>
+                <h3>{{ product.title }}</h3>
+                <p>{{ product.description[:120] }}{% if product.description|length > 120 %}...{% endif %}</p>
+                <strong>Rs. {{ product.price }}</strong>
+            </a>
+        </article>
+    {% else %}
+        <article class="panel">
+            <p>No products matched your search.</p>
+        </article>
+    {% endfor %}
+</section>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="form-card">
+    <h1>Create First Admin</h1>
+    <p>This one-time setup creates the initial admin account so the whole project can be managed from the frontend.</p>
+    <form method="post">
+        <label>Name<input type="text" name="name" required></label>
+        <label>Email<input type="email" name="email" required></label>
+        <label>Phone<input type="text" name="phone" required></label>
+        <label>Password<input type="password" name="password" required></label>
+        <button type="submit">Create Admin Account</button>
+    </form>
+</section>
+{% endblock %}

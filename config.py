@@ -1,13 +1,16 @@
 import os
 
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
 
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
-    ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "admin@gmail.com")
-    MONGO_URI = os.getenv(
-        "MONGO_URI",
-        "mongodb+srv://swathy2006malu_db_user:zyLwmybpsYhi6dyY@cluster0.xs0banz.mongodb.net/?appName=Cluster0",
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        "DATABASE_URL",
+        "mysql+pymysql://root:password@localhost:3306/campusloop",
     )
-    MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "campusloop")
-    UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", os.path.join("static", "uploads"))
-    MAX_CONTENT_LENGTH = 5 * 1024 * 1024
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "app/static/uploads")

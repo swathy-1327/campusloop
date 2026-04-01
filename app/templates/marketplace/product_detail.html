@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}{{ product.title }} | CampusLoop{% endblock %}
+{% block content %}
+<section class="product-shell">
+    <article class="panel">
+        {% if product.image_url %}
+            <img class="detail-image" src="{{ product.image_url }}" alt="{{ product.title }}">
+        {% else %}
+            <div class="detail-image fallback-image">CampusLoop</div>
+        {% endif %}
+        <div class="market-card-top">
+            <span class="pill">{{ product.mode|capitalize }}</span>
+            <span class="pill muted-pill">{{ product.category }}</span>
+        </div>
+        <h1>{{ product.title }}</h1>
+        <p class="price">Rs. {{ product.price }}</p>
+        <p>{{ product.description }}</p>
+        {% if product.ai_generated_description %}
+            <div class="subtle-box">
+                <strong>AI-assisted description</strong>
+                <p>{{ product.ai_generated_description }}</p>
+            </div>
+        {% endif %}
+        {% if current_user.is_authenticated and current_user.id == product.seller_id %}
+            <div class="button-row">
+                <a class="button button-secondary" href="{{ url_for('marketplace.edit_product', product_id=product.id) }}">Edit Listing</a>
+                <form method="post" action="{{ url_for('marketplace.delete_product', product_id=product.id) }}">
+                    <button type="submit" class="button button-danger">Delete Listing</button>
+                </form>
+            </div>
+        {% endif %}
+    </article>
+
+    <aside class="panel">
+        <h2>Seller</h2>
+        <p>{{ product.seller.name }}{% if product.seller.is_verified_seller %} | Verified{% endif %}</p>
+        <p>{{ product.seller.email }}</p>
+        <div class="trust-chip badge-blue">
+            {{ product.seller.trust_level }} | Score {{ product.seller.trust_score }}
+        </div>
+
+        {% if current_user.is_authenticated and current_user.id != product.seller_id %}
+            <form method="post" action="{{ url_for('marketplace.buy_product', product_id=product.id) }}" class="stack">
+                <label>Payment preference
+                    <select name="payment_method">
+                        <option>Cash on meetup</option>
+                        <option>UPI</option>
+                        <option>Bank transfer</option>
+                    </select>
+                </label>
+                <button class="button" type="submit">Buy now</button>
+            </form>
+            <form method="post" action="{{ url_for('marketplace.start_chat', product_id=product.id) }}">
+                <button type="submit" class="button button-secondary">Chat with seller</button>
+            </form>
+        {% elif not current_user.is_authenticated %}
+            <a class="button" href="{{ url_for('auth.login') }}">Login to continue</a>
+        {% endif %}
+    </aside>
+</section>
+
+<section>
+    <h2>Reviews</h2>
+    <div class="stack">
+        {% for review in reviews %}
+            <article class="panel">
+                <p><strong>{{ review.from_user.name }}</strong> rated {{ review.rating }}/5</p>
+                <p>{{ review.comment or 'No comment provided.' }}</p>
+            </article>
+        {% else %}
+            <p class="muted">No reviews yet for this product.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

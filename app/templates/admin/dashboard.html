@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard | CampusLoop{% endblock %}
+{% block content %}
+<section class="section-head">
+    <div>
+        <h1>Admin dashboard</h1>
+        <p>Approve sellers, manage users, edit product details, and moderate everything from one control panel.</p>
+    </div>
+</section>
+
+<section class="admin-layout">
+    <article class="panel">
+        <h2>Pending seller verification</h2>
+        {% for req in pending_requests %}
+            <div class="admin-card">
+                <p><strong>User ID:</strong> {{ req.user_id }}</p>
+                <p><strong>ID Type:</strong> {{ req.id_type }}</p>
+                <p><strong>Proof:</strong> {{ req.id_document_ref }}</p>
+                <form method="post" action="{{ url_for('admin.handle_verification', request_id=req.id, action='approve') }}" class="stack">
+                    <input type="text" name="admin_remark" placeholder="Remark">
+                    <div class="button-row">
+                        <button class="button" type="submit">Approve</button>
+                    </div>
+                </form>
+                <form method="post" action="{{ url_for('admin.handle_verification', request_id=req.id, action='reject') }}">
+                    <button class="button button-danger" type="submit">Reject</button>
+                </form>
+            </div>
+        {% else %}
+            <p class="muted">No pending verification requests.</p>
+        {% endfor %}
+    </article>
+
+    <article class="panel">
+        <div class="section-head">
+            <div>
+                <h2>All users</h2>
+                <p class="muted">View every user at once or filter by buyer and seller roles.</p>
+            </div>
+        </div>
+        <form method="get" class="filters admin-filters">
+            <input type="text" name="user_q" placeholder="Search name, email, phone" value="{{ user_search or '' }}">
+            <select name="role">
+                <option value="both" {% if role_filter == 'both' %}selected{% endif %}>Both</option>
+                <option value="seller" {% if role_filter == 'seller' %}selected{% endif %}>Seller</option>
+                <option value="buyer" {% if role_filter == 'buyer' %}selected{% endif %}>Buyer</option>
+            </select>
+            <button class="button" type="submit">Filter users</button>
+        </form>
+        {% for user in users %}
+            <div class="admin-card">
+                <div class="admin-card-head">
+                    <div>
+                        <p><strong>{{ user.name }}</strong></p>
+                        <p>{{ user.email }} | {{ user.phone }}</p>
+                    </div>
+                    <div class="trust-chip badge-blue">
+                        {{ user.role|capitalize }} | {{ user.account_status }}
+                    </div>
+                </div>
+                <p>Trust score {{ user.trust_score }}{% if user.is_verified_seller %} | Verified seller{% endif %}</p>
+                <div class="button-row">
+                    <form method="post" action="{{ url_for('admin.toggle_user_status', user_id=user.id) }}">
+                        <button class="button button-secondary" type="submit">Toggle status</button>
+                    </form>
+                    <form method="post" action="{{ url_for('admin.set_user_role', user_id=user.id) }}">
+                        <select name="role">
+                            <option value="buyer" {% if user.role == 'buyer' %}selected{% endif %}>Buyer</option>
+                            <option value="seller" {% if user.role == 'seller' %}selected{% endif %}>Seller</option>
+                            <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                        </select>
+                        <button class="button button-secondary" type="submit">Update role</button>
+                    </form>
+                    <form method="post" action="{{ url_for('admin.delete_user', user_id=user.id) }}">
+                        <button class="button button-danger" type="submit">Delete</button>
+                    </form>
+                </div>
+            </div>
+        {% else %}
+            <p class="muted">No users matched this filter.</p>
+        {% endfor %}
+    </article>
+</section>
+
+<section class="panel">
+    <div class="section-head">
+        <div>
+            <h2>Product moderation</h2>
+            <p class="muted">Search by product name, filter by category or mode, then edit or remove listings.</p>
+        </div>
+    </div>
+    <form method="get" class="filters admin-filters">
+        <input type="text" name="product_q" placeholder="Search products" value="{{ product_query or '' }}">
+        <select name="category">
+            <option value="">All categories</option>
+            <option value="Books" {% if selected_category == 'Books' %}selected{% endif %}>Books</option>
+            <option value="Electronics" {% if selected_category == 'Electronics' %}selected{% endif %}>Electronics</option>
+            <option value="Cycles" {% if selected_category == 'Cycles' %}selected{% endif %}>Cycles</option>
+            <option value="Lab Items" {% if selected_category == 'Lab Items' %}selected{% endif %}>Lab Items</option>
+            <option value="Hostel Items" {% if selected_category == 'Hostel Items' %}selected{% endif %}>Hostel Items</option>
+        </select>
+        <select name="mode">
+            <option value="">Sale or rent</option>
+            <option value="sell" {% if selected_mode == 'sell' %}selected{% endif %}>Sale</option>
+            <option value="rent" {% if selected_mode == 'rent' %}selected{% endif %}>Rent</option>
+        </select>
+        <button class="button" type="submit">Filter products</button>
+    </form>
+    {% for product in products %}
+        <div class="admin-card">
+            <div class="admin-product-row">
+                <div>
+                    <p><strong>{{ product.title }}</strong></p>
+                    <p>{{ product.category }} | {{ product.mode|capitalize }} | {{ product.item_condition }} | Rs. {{ product.price }}</p>
+                    <p class="muted">{{ product.use_type }}</p>
+                </div>
+                <div class="pill">{{ product.product_status|capitalize }}</div>
+            </div>
+            <p>{{ product.description[:180] }}{% if product.description|length > 180 %}...{% endif %}</p>
+            {% if not product.removed_by_admin %}
+                <form method="post" action="{{ url_for('admin.remove_product', product_id=product.id) }}" class="stack">
+                    <input type="text" name="reason" placeholder="Reason if hiding this product">
+                    <div class="button-row">
+                        <button class="button button-danger" type="submit">Hide</button>
+                        <a class="button button-secondary" href="{{ url_for('marketplace.edit_product', product_id=product.id) }}">Edit details</a>
+                    </div>
+                </form>
+            {% else %}
+                <form method="post" action="{{ url_for('admin.restore_product', product_id=product.id) }}" class="button-row">
+                    <button class="button button-secondary" type="submit">Keep active</button>
+                </form>
+            {% endif %}
+            <form method="post" action="{{ url_for('admin.delete_product', product_id=product.id) }}">
+                <button class="button button-danger" type="submit">Delete product</button>
+            </form>
+        </div>
+    {% else %}
+        <p class="muted">No products matched this filter.</p>
+    {% endfor %}
+</section>
+
+<section class="grid-two">
+    <article class="panel">
+        <h2>Rent Requests</h2>
+        {% for item in rent_requests %}
+            <div class="admin-card">
+                <p><strong>{{ item.product_name }}</strong> | {{ item.status }}</p>
+                <p>{{ item.user.name }} | Budget: Rs. {{ item.budget }}</p>
+                {% if item.status != 'closed' %}
+                    <form method="post" action="{{ url_for('admin.close_rent_request', request_id=item.id) }}">
+                        <button class="button button-secondary" type="submit">Close Request</button>
+                    </form>
+                {% endif %}
+            </div>
+        {% else %}
+            <p class="muted">No rent requests.</p>
+        {% endfor %}
+    </article>
+
+    <article class="panel">
+        <h2>Unavailable Item Requests</h2>
+        {% for item in unavailable_requests %}
+            <div class="admin-card">
+                <p><strong>{{ item.product_name }}</strong> | {{ item.status }}</p>
+                <p>{{ item.user.name }} | Budget: Rs. {{ item.budget }}</p>
+                {% if item.status != 'closed' %}
+                    <form method="post" action="{{ url_for('admin.close_unavailable_request', request_id=item.id) }}">
+                        <button class="button button-secondary" type="submit">Close Request</button>
+                    </form>
+                {% endif %}
+            </div>
+        {% else %}
+            <p class="muted">No unavailable-item requests.</p>
+        {% endfor %}
+    </article>
+</section>
+{% endblock %}

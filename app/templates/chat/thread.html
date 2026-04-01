@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Chat | CampusLoop{% endblock %}
+{% block content %}
+<section class="panel">
+    <div class="section-head">
+        <div>
+            <h1>Chat about {{ thread.product.title }}</h1>
+            <p>Conversation with {{ thread.seller.name }}</p>
+        </div>
+    </div>
+
+    <div class="chat-window">
+        {% if thread.messages %}
+            {% for message in thread.messages %}
+                <div class="chat-bubble {% if current_user.id == message.sender_id %}self{% endif %}">
+                    <p>{{ message.message_text }}</p>
+                    <span>{{ message.sent_at }}</span>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="muted">No messages yet. Start the conversation.</p>
+        {% endif %}
+    </div>
+
+    <form method="post" class="chat-form">
+        <input type="text" name="message_text" placeholder="Type your message" required>
+        <button class="button" type="submit">Send</button>
+    </form>
+</section>
+{% endblock %}

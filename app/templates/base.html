@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CampusLoop{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container nav-row">
+            <a class="brand" href="{{ url_for('main.index') }}">
+                <span class="brand-mark">C</span>
+                <span>
+                    CampusLoop
+                    <small>Campus reuse marketplace</small>
+                </span>
+            </a>
+            <nav class="nav-links">
+                <a href="{{ url_for('main.index') }}">Home</a>
+                <a href="{{ url_for('marketplace.browse') }}">Marketplace</a>
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('marketplace.dashboard') }}">Dashboard</a>
+                    <a href="{{ url_for('marketplace.add_product') }}">Add Item</a>
+                    <a href="{{ url_for('requests.request_center') }}">Requests</a>
+                    <a href="{{ url_for('auth.profile') }}">Profile</a>
+                    <a href="{{ url_for('admin.seller_verification') }}">Become a Seller</a>
+                    {% if current_user.is_admin() %}
+                        <a href="{{ url_for('admin.dashboard') }}">Admin</a>
+                    {% endif %}
+                    <a href="{{ url_for('auth.logout') }}">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}">Login</a>
+                    <a class="button small" href="{{ url_for('auth.register') }}">Register</a>
+                {% endif %}
+            </nav>
+        </div>
+        <div class="main-nav-strip">
+            <div class="container main-nav-inner">
+                <form method="get" action="{{ url_for('marketplace.browse') }}" class="main-nav-search">
+                    <input type="text" name="q" placeholder="Search books, cycles, electronics, hostel items">
+                    <select name="category">
+                        <option value="">All categories</option>
+                        <option value="Books">Books</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Cycles">Cycles</option>
+                        <option value="Lab Items">Lab Items</option>
+                        <option value="Hostel Items">Hostel Items</option>
+                    </select>
+                    <button class="button small" type="submit">Search</button>
+                </form>
+                <div class="main-nav-links">
+                    <a href="{{ url_for('marketplace.browse', category='Books') }}">Books</a>
+                    <a href="{{ url_for('marketplace.browse', category='Electronics') }}">Electronics</a>
+                    <a href="{{ url_for('marketplace.browse', category='Cycles') }}">Cycles</a>
+                    <a href="{{ url_for('marketplace.browse', category='Lab Items') }}">Lab Items</a>
+                    <a href="{{ url_for('marketplace.browse', category='Hostel Items') }}">Hostel Items</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container page">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-stack">
+                    {% for category, message in messages %}
+                        <div class="flash {{ 'error' if category in ['danger', 'warning'] else category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>Buy less new. Use more smart.</p>
+        </div>
+    </footer>
+</body>
+</html>

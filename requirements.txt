@@ -1,4 +1,6 @@
 Flask==3.1.0
-pymongo==4.10.1
+Flask-Login==0.6.3
+Flask-SQLAlchemy==3.1.1
+PyMySQL==1.1.1
 python-dotenv==1.0.1
-gunicorn
+cryptography==46.0.6

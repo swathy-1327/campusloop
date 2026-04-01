@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Orders | CampusLoop{% endblock %}
+{% block content %}
+<section class="grid-two">
+    <section class="panel">
+        <h1>Orders As Buyer</h1>
+        {% for order in buyer_orders %}
+            <div class="admin-card">
+                <h3>{{ order.product.title }}</h3>
+                <p>Status: {{ order.order_status }}</p>
+                <p>Seller: {{ order.seller.name }}</p>
+                <p>Payment: {{ order.payment_method }}</p>
+                {% if not order.reviews %}
+                    <form method="post" action="{{ url_for('marketplace.submit_review', order_id=order.id) }}" class="stack">
+                        <label>Rating
+                            <select name="rating">
+                                <option value="5">5</option>
+                                <option value="4">4</option>
+                                <option value="3">3</option>
+                                <option value="2">2</option>
+                                <option value="1">1</option>
+                            </select>
+                        </label>
+                        <label>Comment<textarea name="comment" rows="3"></textarea></label>
+                        <button class="button" type="submit">Submit Review</button>
+                    </form>
+                {% else %}
+                    <p class="muted">Review submitted.</p>
+                {% endif %}
+            </div>
+        {% else %}
+            <p class="muted">No buyer orders yet.</p>
+        {% endfor %}
+    </section>
+    <section class="panel">
+        <h1>Orders As Seller</h1>
+        {% for order in seller_orders %}
+            <div class="admin-card">
+                <h3>{{ order.product.title }}</h3>
+                <p>Buyer: {{ order.buyer.name }}</p>
+                <p>Status: {{ order.order_status }}</p>
+                <p>Payment: {{ order.payment_method }}</p>
+            </div>
+        {% else %}
+            <p class="muted">No seller orders yet.</p>
+        {% endfor %}
+    </section>
+</section>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}My Listings | CampusLoop{% endblock %}
+{% block content %}
+<section class="section-head">
+    <h1>My Listings</h1>
+    <a class="button" href="{{ url_for('marketplace.add_product') }}">Add New Product</a>
+</section>
+<section class="card-grid">
+    {% for product in products %}
+        <article class="panel">
+            <h3>{{ product.title }}</h3>
+            <p>{{ product.category }} | {{ product.mode|title }}</p>
+            <p>Status: {{ product.product_status }}</p>
+            <p>Rs. {{ product.price }}</p>
+            <div class="button-row">
+                <a class="button button-secondary" href="{{ url_for('marketplace.product_detail', product_id=product.id) }}">Open</a>
+                <a class="button button-secondary" href="{{ url_for('marketplace.edit_product', product_id=product.id) }}">Edit</a>
+                <form method="post" action="{{ url_for('marketplace.delete_product', product_id=product.id) }}">
+                    <button type="submit" class="button button-danger">Delete</button>
+                </form>
+            </div>
+        </article>
+    {% else %}
+        <article class="panel"><p>You have not listed any products yet.</p></article>
+    {% endfor %}
+</section>
+{% endblock %}

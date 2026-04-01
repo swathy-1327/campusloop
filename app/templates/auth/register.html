@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Register | CampusLoop{% endblock %}
+{% block content %}
+<section class="auth-shell">
+    <form method="post" class="panel form-card">
+        <h1>Create account</h1>
+        <label>Name
+            <input type="text" name="name" required>
+        </label>
+        <label>Email
+            <input type="email" name="email" required>
+        </label>
+        <label>Phone
+            <input type="text" name="phone" required>
+        </label>
+        <label>Password
+            <input type="password" name="password" required>
+        </label>
+        <button class="button" type="submit">Register</button>
+    </form>
+</section>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | CampusLoop{% endblock %}
+{% block content %}
+<section class="section-head">
+    <div>
+        <h1>Your dashboard</h1>
+        <p>Track your products, orders, chats, and marketplace activity.</p>
+    </div>
+    {% if current_user.is_verified_seller %}
+        <a class="button" href="{{ url_for('marketplace.add_product') }}">Add product</a>
+    {% endif %}
+</section>
+
+<section class="grid-three">
+    <article class="panel">
+        <h2>Your products</h2>
+        {% if products %}
+            <ul class="simple-list">
+                {% for product in products %}
+                    <li>
+                        <a href="{{ url_for('marketplace.product_detail', product_id=product.id) }}">{{ product.title }}</a>
+                        <span>Rs. {{ product.price }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="muted">No products yet.</p>
+        {% endif %}
+    </article>
+
+    <article class="panel">
+        <h2>Orders</h2>
+        {% if orders %}
+            <ul class="simple-list">
+                {% for order in orders %}
+                    <li>
+                        <span>{{ order.order_status|capitalize }}</span>
+                        <span>{{ order.payment_method }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="muted">No orders yet.</p>
+        {% endif %}
+    </article>
+
+    <article class="panel">
+        <h2>Chats</h2>
+        {% if chats %}
+            <ul class="simple-list">
+                {% for chat in chats %}
+                    <li>
+                        <a href="{{ url_for('chat.thread_detail', thread_id=chat.id) }}">Open conversation</a>
+                        <span>{{ chat.messages|length }} messages</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="muted">No chats yet.</p>
+        {% endif %}
+    </article>
+</section>
+
+<section class="panel">
+    <div class="section-head">
+        <div>
+            <h2>Fresh marketplace picks</h2>
+            <p>Recent active listings from the campus marketplace.</p>
+        </div>
+        <a href="{{ url_for('marketplace.browse') }}">View all</a>
+    </div>
+    <div class="card-grid">
+        {% for product in marketplace_products %}
+            <a class="market-card" href="{{ url_for('marketplace.product_detail', product_id=product.id) }}">
+                {% if product.image_url %}
+                    <img class="market-image compact" src="{{ product.image_url }}" alt="{{ product.title }}">
+                {% else %}
+                    <div class="market-image compact fallback-image">CampusLoop</div>
+                {% endif %}
+                <span class="pill">{{ product.category }}</span>
+                <h3>{{ product.title }}</h3>
+                <p>{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+                <strong>Rs. {{ product.price }}</strong>
+            </a>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
