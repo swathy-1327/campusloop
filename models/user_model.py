@@ -1,4 +1,5 @@
 from bson import ObjectId
+from flask import current_app
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from services.trust_service import trust_level_from_score
