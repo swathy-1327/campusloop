@@ -14,6 +14,7 @@ from utils.auth import current_user, login_required, seller_required
 from utils.validation import parse_nonnegative_amount
 
 product_bp = Blueprint("product", __name__, url_prefix="/products")
+ALLOWED_IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "gif", "webp"}
 
 
 @product_bp.app_context_processor
@@ -64,6 +65,7 @@ def add_product():
         description = request.form.get("description", "").strip()
         use_ai = request.form.get("use_ai") == "yes"
         uploaded_images = request.files.getlist("images")
+        uploaded_images = [image for image in uploaded_images if image and image.filename]
 
         if not all([title, category, use_type, price, condition, mode]):
             flash("Please complete all required product details.", "error")
@@ -71,6 +73,14 @@ def add_product():
         parsed_price = parse_nonnegative_amount(price)
         if parsed_price is None:
             flash("Enter a valid price that is zero or greater.", "error")
+            return render_template("add_product.html")
+        if any(
+            "." not in secure_filename(image.filename)
+            or secure_filename(image.filename).rsplit(".", 1)[1].lower()
+            not in ALLOWED_IMAGE_EXTENSIONS
+            for image in uploaded_images
+        ):
+            flash("Upload JPG, PNG, GIF, or WEBP image files only.", "error")
             return render_template("add_product.html")
 
         ai_description = ""
@@ -81,11 +91,7 @@ def add_product():
 
         saved_image_urls = [item.strip() for item in image_urls.split(",") if item.strip()]
         for image in uploaded_images:
-            if not image or not image.filename:
-                continue
             filename = secure_filename(image.filename)
-            if not filename:
-                continue
             unique_name = f"{uuid.uuid4().hex}_{filename}"
             file_path = os.path.join(current_app.config["UPLOAD_FOLDER"], unique_name)
             image.save(file_path)

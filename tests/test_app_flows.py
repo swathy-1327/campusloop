@@ -1,7 +1,9 @@
 import os
 import sys
+import tempfile
 import unittest
 from datetime import datetime, timezone
+from io import BytesIO
 from pathlib import Path
 
 import mongomock
@@ -283,6 +285,49 @@ class CampusLoopFlowTests(unittest.TestCase):
         ).inserted_id
         self.client.post(f"/products/{hidden}/buy")
         self.assertEqual(self.db.orders.count_documents({}), 0)
+
+    def test_product_image_upload_accepts_images_and_rejects_other_files(self):
+        seller_client = self.app.test_client()
+        self.login(seller_client, self.seller)
+        upload_dir = tempfile.TemporaryDirectory(dir=ROOT)
+        self.addCleanup(upload_dir.cleanup)
+        self.app.config["UPLOAD_FOLDER"] = upload_dir.name
+        invalid = seller_client.post(
+            "/products/new",
+            data={
+                "title": "Script upload",
+                "category": "Books",
+                "use_type": "Study",
+                "price": "1",
+                "condition": "Good",
+                "mode": "sale",
+                "description": "Should be rejected",
+                "use_ai": "no",
+                "images": (BytesIO(b"<script>alert(1)</script>"), "payload.html"),
+            },
+            content_type="multipart/form-data",
+        )
+        self.assertEqual(invalid.status_code, 200)
+        self.assertEqual(self.db.products.count_documents({}), 0)
+
+        valid = seller_client.post(
+            "/products/new",
+            data={
+                "title": "Image listing",
+                "category": "Books",
+                "use_type": "Study",
+                "price": "1",
+                "condition": "Good",
+                "mode": "sale",
+                "description": "Has image",
+                "use_ai": "no",
+                "images": (BytesIO(b"fake png image bytes"), "book.png"),
+            },
+            content_type="multipart/form-data",
+        )
+        self.assertEqual(valid.status_code, 302)
+        product = self.db.products.find_one({"title": "Image listing"})
+        self.assertTrue(product["image_urls"][0].endswith("_book.png"))
 
     def test_chat_rejects_a_forged_seller_id_and_admin_is_restricted(self):
         product_id = self.db.products.insert_one(
