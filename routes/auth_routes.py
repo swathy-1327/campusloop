@@ -1,4 +1,5 @@
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from pymongo.errors import DuplicateKeyError
 
 from models.user_model import create_user, find_user_by_email, find_user_by_id, update_user_profile
 from utils.auth import current_user, login_required
@@ -31,7 +32,12 @@ def register():
             flash("An account with this email already exists.", "error")
             return render_template("register.html")
 
-        user = create_user(name=name, email=email, phone=phone, password=password)
+        try:
+            user = create_user(name=name, email=email, phone=phone, password=password)
+        except DuplicateKeyError:
+            flash("An account with this email already exists.", "error")
+            return render_template("register.html")
+        session.clear()
         session["user_id"] = str(user["_id"])
         flash("Welcome to CampusLoop. Your account has been created.", "success")
         return redirect(url_for("product.dashboard"))
@@ -48,7 +54,11 @@ def login():
         if not user or not user.check_password(password):
             flash("Invalid email or password.", "error")
             return render_template("login.html")
+        if user.get("account_status", "active") != "active":
+            flash("This account is blocked. Please contact an administrator.", "error")
+            return render_template("login.html")
 
+        session.clear()
         session["user_id"] = str(user["_id"])
         flash(f"Welcome back, {user['name']}.", "success")
         return redirect(url_for("product.dashboard"))

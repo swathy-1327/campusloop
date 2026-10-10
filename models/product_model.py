@@ -64,10 +64,14 @@ def list_products_for_seller(seller_id):
 
 
 def find_product_by_id(product_id):
+    if not ObjectId.is_valid(product_id):
+        return None
     return _products().find_one({"_id": ObjectId(product_id)})
 
 
 def admin_update_product_status(product_id, product_status, removal_reason=""):
+    if not ObjectId.is_valid(product_id):
+        return
     _products().update_one(
         {"_id": ObjectId(product_id)},
         {
@@ -82,6 +86,8 @@ def admin_update_product_status(product_id, product_status, removal_reason=""):
 
 
 def admin_edit_product(product_id, title, category, use_type, price, condition, mode, description):
+    if not ObjectId.is_valid(product_id):
+        return
     _products().update_one(
         {"_id": ObjectId(product_id)},
         {
@@ -100,4 +106,6 @@ def admin_edit_product(product_id, title, category, use_type, price, condition, 
 
 
 def admin_delete_product(product_id):
+    if not ObjectId.is_valid(product_id):
+        return
     _products().delete_one({"_id": ObjectId(product_id)})

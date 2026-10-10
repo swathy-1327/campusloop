@@ -11,6 +11,7 @@ from models.user_model import find_user_by_id
 from services.ai_description_service import generate_product_description
 from services.trust_service import apply_trust_event
 from utils.auth import current_user, login_required, seller_required
+from utils.validation import parse_nonnegative_amount
 
 product_bp = Blueprint("product", __name__, url_prefix="/products")
 
@@ -67,6 +68,10 @@ def add_product():
         if not all([title, category, use_type, price, condition, mode]):
             flash("Please complete all required product details.", "error")
             return render_template("add_product.html")
+        parsed_price = parse_nonnegative_amount(price)
+        if parsed_price is None:
+            flash("Enter a valid price that is zero or greater.", "error")
+            return render_template("add_product.html")
 
         ai_description = ""
         if use_ai:
@@ -91,7 +96,7 @@ def add_product():
             title=title,
             category=category,
             use_type=use_type,
-            price=float(price),
+            price=parsed_price,
             condition=condition,
             mode=mode,
             image_urls=saved_image_urls,
@@ -107,11 +112,14 @@ def add_product():
 @product_bp.route("/<product_id>")
 def product_detail(product_id):
     product = find_product_by_id(product_id)
-    if not product:
+    if not product or product.get("product_status", "active") != "active":
         flash("Product not found.", "error")
         return redirect(url_for("product.marketplace"))
 
     seller = find_user_by_id(product["seller_id"])
+    if not seller or seller.get("account_status", "active") != "active":
+        flash("This listing is no longer available.", "error")
+        return redirect(url_for("product.marketplace"))
     return render_template("product_detail.html", product=product, seller=seller)
 
 
@@ -122,6 +130,13 @@ def buy_product(product_id):
     product = find_product_by_id(product_id)
     if not product:
         flash("Product not found.", "error")
+        return redirect(url_for("product.marketplace"))
+    if product.get("product_status", "active") != "active":
+        flash("This listing is no longer available.", "error")
+        return redirect(url_for("product.marketplace"))
+    seller = find_user_by_id(product.get("seller_id", ""))
+    if not seller or seller.get("account_status", "active") != "active":
+        flash("This listing is no longer available.", "error")
         return redirect(url_for("product.marketplace"))
     if product["seller_id"] == str(user["_id"]):
         flash("You cannot buy your own product.", "error")

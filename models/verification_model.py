@@ -32,6 +32,8 @@ def get_pending_requests():
 
 
 def review_verification_request(request_id, decision, remark, admin_id):
+    if not ObjectId.is_valid(request_id):
+        return None
     _verification_requests().update_one(
         {"_id": ObjectId(request_id)},
         {

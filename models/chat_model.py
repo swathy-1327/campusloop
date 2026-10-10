@@ -15,6 +15,8 @@ def get_chat_for_product_users(product_id, buyer_id, seller_id):
 
 
 def get_chat_by_id(chat_id):
+    if not ObjectId.is_valid(chat_id):
+        return None
     return _chats().find_one({"_id": ObjectId(chat_id)})
 
 

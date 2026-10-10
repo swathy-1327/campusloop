@@ -4,8 +4,8 @@
 <section class="panel">
     <div class="section-head">
         <div>
-            <h1>Chat about {{ product.title }}</h1>
-            <p>Conversation with {{ seller.name }}</p>
+            <h1>Chat about {{ product.title if product else 'removed listing' }}</h1>
+            <p>Conversation with {{ seller.name if seller else 'a former member' }}</p>
         </div>
     </div>
 
@@ -22,9 +22,13 @@
         {% endif %}
     </div>
 
-    <form method="post" class="chat-form">
-        <input type="text" name="message_text" placeholder="Type your message" required>
-        <button class="button" type="submit">Send</button>
-    </form>
+    {% if seller %}
+        <form method="post" class="chat-form">
+            <input type="text" name="message_text" placeholder="Type your message" required>
+            <button class="button" type="submit">Send</button>
+        </form>
+    {% else %}
+        <p class="muted">This conversation is read-only because the seller account was removed.</p>
+    {% endif %}
 </section>
 {% endblock %}

@@ -13,8 +13,16 @@ chat_bp = Blueprint("chat", __name__, url_prefix="/chat")
 def product_chat(product_id, seller_id):
     user = current_user()
     product = find_product_by_id(product_id)
-    if not product:
+    if not product or product.get("product_status", "active") != "active":
         flash("Product not found.", "error")
+        return redirect(url_for("product.marketplace"))
+
+    if product.get("seller_id") != seller_id:
+        flash("This seller does not own that listing.", "error")
+        return redirect(url_for("product.product_detail", product_id=product_id))
+    seller = find_user_by_id(seller_id)
+    if not seller or seller.get("account_status", "active") != "active":
+        flash("This seller is no longer available.", "error")
         return redirect(url_for("product.marketplace"))
 
     if request.method == "POST":
@@ -35,7 +43,7 @@ def product_chat(product_id, seller_id):
         "chat.html",
         chat=get_chat_for_product_users(product_id, str(user["_id"]), seller_id),
         product=product,
-        seller=find_user_by_id(seller_id),
+        seller=seller,
     )
 
 
@@ -52,7 +60,12 @@ def chat_thread(chat_id):
         flash("You do not have access to this conversation.", "error")
         return redirect(url_for("product.dashboard"))
 
+    product = find_product_by_id(chat["product_id"])
+    seller = find_user_by_id(chat["seller_id"])
     if request.method == "POST":
+        if not seller:
+            flash("This conversation is read-only because the seller account was removed.", "error")
+            return redirect(url_for("chat.chat_thread", chat_id=chat_id))
         message_text = request.form.get("message_text", "").strip()
         if message_text:
             create_or_append_message(
@@ -68,6 +81,6 @@ def chat_thread(chat_id):
     return render_template(
         "chat.html",
         chat=chat,
-        product=find_product_by_id(chat["product_id"]),
-        seller=find_user_by_id(chat["seller_id"]),
+        product=product,
+        seller=seller,
     )

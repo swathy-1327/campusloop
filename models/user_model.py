@@ -42,10 +42,14 @@ def find_user_by_email(email):
 
 
 def find_user_by_id(user_id):
+    if not ObjectId.is_valid(user_id):
+        return None
     return _wrap(_users().find_one({"_id": ObjectId(user_id)}))
 
 
 def update_user_profile(user_id, name, phone):
+    if not ObjectId.is_valid(user_id):
+        return
     _users().update_one({"_id": ObjectId(user_id)}, {"$set": {"name": name, "phone": phone}})
 
 
@@ -71,6 +75,8 @@ def list_users_filtered(role_filter="both", search=""):
 
 
 def admin_update_user_status(user_id, account_status=None, is_verified_seller=None):
+    if not ObjectId.is_valid(user_id):
+        return
     updates = {}
     if account_status is not None:
         updates["account_status"] = account_status
@@ -81,6 +87,49 @@ def admin_update_user_status(user_id, account_status=None, is_verified_seller=No
     if updates:
         _users().update_one({"_id": ObjectId(user_id)}, {"$set": updates})
 
+    if account_status == "blocked":
+        get_db().products.update_many(
+            {"seller_id": str(user_id), "product_status": "active"},
+            {
+                "$set": {
+                    "product_status": "hidden",
+                    "removed_by_admin": True,
+                    "removal_reason": "Seller account blocked",
+                    "updated_at": current_app.extensions["now"](),
+                }
+            },
+        )
+    elif account_status == "active":
+        get_db().products.update_many(
+            {
+                "seller_id": str(user_id),
+                "product_status": "hidden",
+                "removal_reason": "Seller account blocked",
+            },
+            {
+                "$set": {
+                    "product_status": "active",
+                    "removed_by_admin": False,
+                    "removal_reason": "",
+                    "updated_at": current_app.extensions["now"](),
+                }
+            },
+        )
+
 
 def admin_delete_user(user_id):
+    if not ObjectId.is_valid(user_id):
+        return
+    user_key = str(user_id)
+    db = get_db()
+    db.products.update_many(
+        {"seller_id": user_key},
+        {
+            "$set": {
+                "product_status": "hidden",
+                "removed_by_admin": True,
+                "removal_reason": "Seller account removed",
+            }
+        },
+    )
     _users().delete_one({"_id": ObjectId(user_id)})

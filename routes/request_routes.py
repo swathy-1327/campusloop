@@ -2,6 +2,7 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from models.request_model import create_rent_request, create_unavailable_request, list_requests_for_user
 from utils.auth import current_user, login_required
+from utils.validation import parse_nonnegative_amount
 
 request_bp = Blueprint("request", __name__, url_prefix="/requests")
 
@@ -27,7 +28,12 @@ def rent_request():
             flash("Please fill in the required rental request fields.", "error")
             return render_template("rent_request.html")
 
-        create_rent_request(str(user["_id"]), product_name, category, duration, float(budget), note)
+        parsed_budget = parse_nonnegative_amount(budget)
+        if parsed_budget is None:
+            flash("Enter a valid budget that is zero or greater.", "error")
+            return render_template("rent_request.html")
+
+        create_rent_request(str(user["_id"]), product_name, category, duration, parsed_budget, note)
         flash("Rental request posted.", "success")
         return redirect(url_for("request.request_center"))
 
@@ -47,7 +53,12 @@ def unavailable_request():
             flash("Please fill in the required unavailable-item fields.", "error")
             return render_template("unavailable_request.html")
 
-        create_unavailable_request(str(user["_id"]), product_name, category, float(budget), description)
+        parsed_budget = parse_nonnegative_amount(budget)
+        if parsed_budget is None:
+            flash("Enter a valid budget that is zero or greater.", "error")
+            return render_template("unavailable_request.html")
+
+        create_unavailable_request(str(user["_id"]), product_name, category, parsed_budget, description)
         flash("Unavailable item request posted.", "success")
         return redirect(url_for("request.request_center"))
 

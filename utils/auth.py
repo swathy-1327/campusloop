@@ -10,7 +10,10 @@ def current_user():
     if not user_id:
         return None
     try:
-        return find_user_by_id(user_id)
+        user = find_user_by_id(user_id)
+        if user and user.get("account_status", "active") == "active":
+            return user
+        return None
     except Exception:
         return None
 

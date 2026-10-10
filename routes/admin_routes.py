@@ -16,6 +16,7 @@ from models.user_model import (
 from models.verification_model import create_verification_request, get_pending_requests, list_requests_for_user, review_verification_request
 from services.trust_service import apply_trust_event
 from utils.auth import admin_required, current_user, login_required
+from utils.validation import parse_nonnegative_amount
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -70,6 +71,9 @@ def admin_dashboard():
 def review_request(request_id):
     admin = current_user()
     decision = request.form.get("decision", "").strip()
+    if decision not in {"approved", "rejected"}:
+        flash("Choose approve or reject for a verification request.", "error")
+        return redirect(url_for("admin.admin_dashboard"))
     remark = request.form.get("remark", "").strip()
     verification_request = review_verification_request(request_id, decision, remark, str(admin["_id"]))
     if not verification_request:
@@ -89,7 +93,11 @@ def review_request(request_id):
 @admin_bp.route("/users/<user_id>/status", methods=["POST"])
 @admin_required
 def update_user_status(user_id):
-    admin_update_user_status(user_id, account_status=request.form.get("account_status", "active"))
+    account_status = request.form.get("account_status", "active")
+    if account_status not in {"active", "blocked"}:
+        flash("Choose a valid account status.", "error")
+        return redirect(url_for("admin.admin_dashboard"))
+    admin_update_user_status(user_id, account_status=account_status)
     flash("User status updated.", "success")
     return redirect(url_for("admin.admin_dashboard"))
 
@@ -105,9 +113,13 @@ def delete_user(user_id):
 @admin_bp.route("/products/<product_id>/status", methods=["POST"])
 @admin_required
 def update_product_status(product_id):
+    product_status = request.form.get("product_status", "active")
+    if product_status not in {"active", "hidden"}:
+        flash("Choose a valid listing status.", "error")
+        return redirect(url_for("admin.admin_dashboard"))
     admin_update_product_status(
         product_id,
-        request.form.get("product_status", "active"),
+        product_status,
         request.form.get("removal_reason", "").strip(),
     )
     flash("Product moderation updated.", "success")
@@ -135,12 +147,17 @@ def edit_product(product_id):
             flash("All product fields are required for admin editing.", "error")
             return render_template("admin_product_edit.html", product=product)
 
+        parsed_price = parse_nonnegative_amount(price)
+        if parsed_price is None:
+            flash("Enter a valid price that is zero or greater.", "error")
+            return render_template("admin_product_edit.html", product=product)
+
         admin_edit_product(
             product_id,
             title=title,
             category=category,
             use_type=use_type,
-            price=float(price),
+            price=parsed_price,
             condition=condition,
             mode=mode,
             description=description,
