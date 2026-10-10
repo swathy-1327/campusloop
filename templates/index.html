@@ -1,40 +1,40 @@
 {% extends 'base.html' %}
-{% block title %}CampusLoop | Home{% endblock %}
+{% block title %}CampusLoop | Keep campus essentials in circulation{% endblock %}
 {% block content %}
 <section class="hero">
     <div class="hero-copy">
-        <span class="eyebrow">Campus Circular Economy Platform</span>
-        <h1>Buy, sell, rent, and request student essentials inside one trusted campus network.</h1>
-        <p>CampusLoop helps students reuse books, lab gear, electronics, hostel items, and more with admin moderation and trust scoring built in.</p>
+        <span class="eyebrow">A marketplace for campus life</span>
+        <h1>Good things deserve another semester.</h1>
+        <p>Find a textbook, borrow a lab tool, pass on a desk lamp. CampusLoop makes it easier for students to buy, sell, rent, and request the essentials already on campus.</p>
         <div class="hero-actions">
-            <a class="button" href="{{ url_for('auth.register') }}">Start With CampusLoop</a>
-            <a class="button button-secondary" href="{{ url_for('product.marketplace') }}">Browse Marketplace</a>
+            <a class="button" href="{{ url_for('product.marketplace') }}">Explore the marketplace</a>
+            <a class="button button-secondary" href="{{ url_for('auth.register') }}">Join your campus</a>
         </div>
     </div>
     <div class="hero-card">
         <div class="stat-card">
-            <h3>Verified sellers</h3>
-            <p>Admin approval before anyone lists products.</p>
+            <h3>Trade with more confidence</h3>
+            <p>Sellers are reviewed before they can publish a listing.</p>
         </div>
         <div class="stat-card">
-            <h3>Rent + request flow</h3>
-            <p>Perfect for semester-only and temporary campus needs.</p>
+            <h3>Buy, rent, or ask</h3>
+            <p>Choose what fits the item and how long you need it.</p>
         </div>
         <div class="stat-card">
-            <h3>Trust score logic</h3>
-            <p>Score updates make safer decisions easier for buyers.</p>
+            <h3>Keep useful things moving</h3>
+            <p>Pass on the items that would otherwise sit unused.</p>
         </div>
     </div>
 </section>
 
 <section class="grid-two">
     <article class="panel">
-        <h2>Why it matters</h2>
-        <p>Students often buy items for a single semester and then struggle to resell them. CampusLoop turns those scattered resale moments into a structured campus-wide reuse system.</p>
+        <h2>Made for campus rhythms</h2>
+        <p>Course materials, hostel essentials, and lab gear are often needed for only part of the year. CampusLoop helps useful items find their next student when plans change or a semester ends.</p>
     </article>
     <article class="panel">
-        <h2>What makes it different</h2>
-        <p>Unlike general marketplaces, CampusLoop is campus-specific, supports renting, handles unavailable-item demand, and adds seller verification with admin moderation.</p>
+        <h2>A marketplace with community built in</h2>
+        <p>Seller review, trust levels, direct conversations, and admin moderation help organize campus exchange. Listings support both sale and rental, with requests for items students cannot find yet.</p>
     </article>
 </section>
 {% endblock %}

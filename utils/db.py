@@ -4,7 +4,7 @@ from pymongo import MongoClient
 
 
 def init_db(app):
-    client = MongoClient(app.config["MONGO_URI"])
+    client = MongoClient(app.config["MONGO_URI"], serverSelectionTimeoutMS=5000)
     db = client[app.config["MONGO_DB_NAME"]]
     app.extensions["mongo_client"] = client
     app.extensions["mongo_db"] = db

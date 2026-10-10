@@ -1,5 +1,4 @@
 from bson import ObjectId
-from flask import current_app
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from services.trust_service import trust_level_from_score
@@ -20,14 +19,12 @@ def _wrap(user):
 
 
 def create_user(name, email, phone, password):
-    admin_email = current_app.config.get("ADMIN_EMAIL", "admin@gmail.com").lower()
-    is_admin = email.lower() == admin_email
     payload = {
         "name": name,
         "email": email,
         "password_hash": generate_password_hash(password),
         "phone": phone,
-        "role": "admin" if is_admin else "buyer",
+        "role": "buyer",
         "account_status": "active",
         "trust_score": 20,
         "trust_level": trust_level_from_score(20),

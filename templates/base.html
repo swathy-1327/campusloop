@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Buy, sell, rent, and request student essentials in one campus marketplace. Reuse more with CampusLoop.">
+    <meta name="theme-color" content="#f5f7f2">
     <title>{% block title %}CampusLoop{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
@@ -38,8 +40,8 @@
         <div class="main-nav-strip">
             <div class="container main-nav-inner">
                 <form method="get" action="{{ url_for('product.marketplace') }}" class="main-nav-search">
-                    <input type="text" name="q" placeholder="Search books, cycles, electronics, hostel items">
-                    <select name="category">
+                    <input type="text" name="q" placeholder="Search campus essentials" aria-label="Search listings">
+                    <select name="category" aria-label="Filter by category">
                         <option value="">All categories</option>
                         <option value="Books">Books</option>
                         <option value="Electronics">Electronics</option>
@@ -75,7 +77,7 @@
 
     <footer class="site-footer">
         <div class="container">
-            <p>Buy less new. Use more smart.</p>
+            <p>CampusLoop · Keep good things in circulation.</p>
         </div>
     </footer>
 </body>

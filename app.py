@@ -1,6 +1,10 @@
 import os
 
-from flask import Flask
+import click
+from dotenv import load_dotenv
+from flask import Flask, jsonify
+
+load_dotenv()
 
 from config import Config
 from routes.admin_routes import admin_bp
@@ -26,6 +30,35 @@ def create_app():
     @app.context_processor
     def inject_current_user():
         return {"current_user": current_user()}
+
+    @app.get("/health")
+    def health():
+        app.extensions["mongo_db"].command("ping")
+        return jsonify(status="ok"), 200
+
+    @app.cli.command("create-admin")
+    @click.argument("email")
+    @click.option("--name", prompt=True)
+    @click.option("--phone", prompt=True)
+    def create_admin(email, name, phone):
+        """Create an administrator or promote an existing account."""
+        from models.user_model import create_user, find_user_by_email
+
+        email = email.strip().lower()
+        user = find_user_by_email(email)
+        if user:
+            app.extensions["mongo_db"].users.update_one(
+                {"_id": user["_id"]}, {"$set": {"role": "admin", "account_status": "active"}}
+            )
+            click.echo(f"Administrator access enabled for {email}.")
+            return
+
+        password = click.prompt("Password", hide_input=True, confirmation_prompt=True)
+        user = create_user(name=name.strip(), email=email, phone=phone.strip(), password=password)
+        app.extensions["mongo_db"].users.update_one(
+            {"_id": user["_id"]}, {"$set": {"role": "admin"}}
+        )
+        click.echo(f"Administrator account created for {email}.")
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(product_bp)
